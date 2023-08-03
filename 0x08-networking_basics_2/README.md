@@ -2,7 +2,7 @@
 
 
 Resources
-www.en.m.wikipedia.org/wiki/Localhost
+[https://intranet.alxswe.com/rltoken/Odcc_tyAQlcANCCrtmxo6A]
 What is 0.0.0.0
 What is the hosts file
 Netcat examples

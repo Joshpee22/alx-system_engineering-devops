@@ -2,7 +2,7 @@
 
 
 Resources
-What is localhost
+(https://google.com/What is localhost)
 What is 0.0.0.0
 What is the hosts file
 Netcat examples

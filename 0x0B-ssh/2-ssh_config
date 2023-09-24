@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# A client configuration file to set password to no
+
+PasswordAuthentication no
+IdentifyFile ~/.ssh/school

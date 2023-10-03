@@ -1,23 +1,47 @@
 #!/usr/bin/env bash
-# Install nginx on web server; Nginx should be listening on port 80
-# redirects to another page
-# Have a custom 404 page
+# Install nginx server, add content to index.html, 404.html, and configure custom HTTP response header
 
-ADD301_REDIRECT="\\\tlocation /redirect_me {\n\t\t return 301 https://google.com;\n\t}\n"
-ADD404_NOTFOUND="error_page 404 /custom_404.html;\n\\tlocation = /custom_404.html {\n\t\t root /usr/share/nginx/html;\n\t\tinternal;\n\t}\n"
-PATTERN="#error_page 404 /404.html;"
-ADD_HEADER="\\\tadd_header X-Served-By $HOSTNAME;"
+# Update and upgrade packages
+sudo apt -y update
+sudo apt -y upgrade
 
-sudo apt-get update
-sudo apt-get -y install nginx
+# Install Nginx
+sudo apt -y install nginx
+
+# Start Nginx
 sudo service nginx start
 
-echo "Hello World!" | sudo tee /usr/share/nginx/html/index.html
-sudo sed -i "30i $ADD301_REDIRECT" /etc/nginx/sites-available/default #add at line 30
+# Set permissions for the web directory
+sudo chown -R "$USER":"$USER" /var/www/html
+sudo chmod -R 755 /var/www
 
-echo "Ceci n'est pas une page" | sudo tee /usr/share/nginx/html/custom_404.html
-sudo sed -i "s@$PATTERN@$ADD404_NOTFOUND@" /etc/nginx/sites-available/default #uncomment and replace
+# Add content to index.html and 404.html
+sudo echo 'Hello World!' | sudo tee /var/www/html/index.html
+sudo echo -e "Ceci n'est pas une page\n" | sudo tee /var/www/html/404.html
 
-sudo sed -i "27i $ADD_HEADER" /etc/nginx/sites-available/default
+# Configure default Nginx server block
+sudo bash -c 'cat <<EOL > /etc/nginx/sites-enabled/default
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+    server_name _;
+    location /redirect_me {
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+    }
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+    error_page 404 /404.html;
+    location = /404.html {
+        root /var/www/html;
+        internal;
+    }
+    add_header X-Served-By \$hostname;
+}
+EOL'
 
-sudo service nginx restart
+# Test Nginx configuration and reload it
+sudo nginx -t && sudo systemctl reload nginx
+

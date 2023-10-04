@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Install nginx server, add content to index.html, 404.html, and configure custom HTTP response header
 
 # Update and upgrade packages
 sudo apt -y update
@@ -8,16 +7,16 @@ sudo apt -y upgrade
 # Install Nginx
 sudo apt -y install nginx
 
-# Start Nginx
-sudo service nginx start
+# Start Nginx using systemctl
+sudo systemctl start nginx
 
-# Set permissions for the web directory
-sudo chown -R "$USER":"$USER" /var/www/html
-sudo chmod -R 755 /var/www
+# Set permissions for the web directory (www-data is the Nginx user)
+sudo chown -R www-data:www-data /var/www/html
+sudo chmod -R 755 /var/www/html
 
 # Add content to index.html and 404.html
-sudo echo 'Hello World!' | sudo tee /var/www/html/index.html
-sudo echo -e "Ceci n'est pas une page\n" | sudo tee /var/www/html/404.html
+echo 'Hello World!' | sudo tee /var/www/html/index.html
+echo -e "Ceci n'est pas une page\n" | sudo tee /var/www/html/404.html
 
 # Configure default Nginx server block
 sudo bash -c 'cat <<EOL > /etc/nginx/sites-enabled/default
@@ -27,17 +26,21 @@ server {
     root /var/www/html;
     index index.html index.htm index.nginx-debian.html;
     server_name _;
+
     location /redirect_me {
         return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
     }
+
     location / {
         try_files \$uri \$uri/ =404;
     }
+
     error_page 404 /404.html;
     location = /404.html {
         root /var/www/html;
         internal;
     }
+
     add_header X-Served-By \$hostname;
 }
 EOL'

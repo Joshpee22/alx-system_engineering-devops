@@ -1,16 +1,11 @@
 #!/usr/bin/env bash
-# Configure Nginx so that its HTTP response contains a custom header (on web-01 and web-02)
-# The name of the custom HTTP header must be X-Served-By
-# The value of the custom HTTP header must be the hostname of the server Nginx is running on
-sudo apt-get update
+# returns a custom header on request
+
+sudo apt-get -y update
 sudo apt-get -y install nginx
 
-# configure firewall to allow request through port 80
-sudo ufw allow 'Nginx HTTP'
+sudo sed -i "47i\\\tadd_header X-Served-By $HOSTNAME;" /etc/nginx/sites-available/default
+echo "Hello World!" | sudo tee /var/www/html/index.html
+echo "Ceci n'est pas une page" | sudo tee /var/www/html/404.html
 
-sudo mkdir -p /var/www/html
-
-# change permissions to allow us to easily create files in this directory
-sudo chmod -R 755 /var/www
-
-#  create the index page
+sudo service nginx start

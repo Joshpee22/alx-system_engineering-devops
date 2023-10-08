@@ -1,0 +1,14 @@
+frontend https
+    bind *:443 ssl crt /etc/ssl/private/www.joshpee.tech.pem
+    default_backend web_backend
+
+frontend http
+    bind *:80
+    mode http
+    default_backend web_backend
+
+backend web_backend
+    mode http
+    redirect scheme https if !{ ssl_fc }
+    server 358547-web-01 34.227.94.33:80 check
+    server 358547-web-02 54.90.37.150:80 check

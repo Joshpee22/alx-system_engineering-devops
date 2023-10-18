@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Backup and compress all databases
+
+# Check if the password is provided
+if [ -z "$1" ]; then
+    echo "Usage: $0 <mysql_password>"
+    exit 1
+fi
+
+# Set the password
+MYSQL_PASSWORD="$1"
+
+# Create a backup directory if it doesn't exist
+BACKUP_DIR="mysql_backups"
+mkdir -p "$BACKUP_DIR"
+
+# MySQL dump and archive creation
+mysqldump --all-databases -u root --password="$MYSQL_PASSWORD" > "$BACKUP_DIR/backup.sql"
+if [ $? -eq 0 ]; then
+    day=$(date +"%d")
+    month=$(date +"%m")
+    year=$(date +"%Y")
+    file_name="$BACKUP_DIR/$day-$month-$year.tar.gz"
+    
+    tar -czvf "$file_name" -C "$BACKUP_DIR" backup.sql
+    if [ $? -eq 0 ]; then
+        echo "Backup completed successfully: $file_name"
+        # Clean up the intermediate backup.sql file if desired
+        # rm "$BACKUP_DIR/backup.sql"
+    else
+        echo "Error: Failed to create compressed archive."
+    fi
+else
+    echo "Error: Failed to create MySQL dump."
+fi
